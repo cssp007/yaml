@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+      run: httpd
+    name: httpd
+spec:
+   replicas: 2
+   selector:
+     matchLabels:
+         run: httpd
+   template:
+      metadata:
+        labels:
+          run: httpd
+      spec:
+        containers:
+           - image: nginx
+             name:  httpd
+             volumeMounts:
+               - name: mypd
+                 mountPath: /usr/share/nginx/html/
+             resources:
+                 limits: 
+                    cpu: 100m
+                 requests:
+                    cpu: 100m
+        volumes:
+           - name: mypd
+             persistentVolumeClaim:
+                claimName: pvc-name

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-server
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+     matchLabels:
+         app: mysql
+  template:
+    metadata:
+      labels:
+        name: mysql-server
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          ports:
+          - containerPort: 3306
+          env:
+          - name: MYSQL_USER
+            value: cssp
+          - name: MYSQL_PASSWORD
+            value : cssp@143
+          - name: MYSQL_ROOT_PASSWORD
+            value: Cssp@143
+          - name: MYSQL_DATABASE
+            value: "zabbix"
