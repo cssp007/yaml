@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+      run: httpd
+    name: httpd
+spec:
+   replicas: 2
+   selector:
+     matchLabels:
+         run: httpd
+   strategy:
+      type: RollingUpdate
+      rollingUpdate:
+         maxSurge: 0
+         maxUnavailable: 1
+   minReadySeconds: 5
+   revisionHistoryLimit: 5               
+   template:
+      metadata:
+        labels:
+          run: httpd
+      spec:
+        containers:
+           - image: httpd
+             name:  httpd
+             resources:
+                 limits:
+                    cpu: 100m
+                 requests:
+                    cpu: 100m
+                                        
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpd-service
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 30303
+      port: 80
+      targetPort: 80
+  selector:
+    run: httpd
+        
+        
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-httpd
+spec:
+  maxReplicas: 5
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: httpd
+  targetCPUUtilizationPercentage: 40
