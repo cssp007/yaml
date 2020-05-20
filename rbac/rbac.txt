@@ -1,0 +1,50 @@
+1. Create kubeconfig file
+=============================================================
+Step 1: Create RSA private key for user
+openssl genrsa -out user-name.key 2048
+Step 2: Create certificate signing request
+openssl req -new -key user-name.key(RSA private key) -out user-name.csr -subj "/CN=username/O=namespace"
+Step 3: Need ca.crt and ca.key to sign the certificate from kubernetes cluster(path: /etc/kubernetes/pki/)
+Step 4: Sign user certificate
+openssl x509 -req -in user-name.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out user-name.crt -days 365
+Step 5: Create kubeconfig file
+ 1. Create from user end so need to share below files
+    ca.crt, user.crt and user.key
+    To craete, run the below commands:
+    kubectl --kubeconfig user.kubeconfig config set-cluster kubernetes --server https://kubernetes-server-IP:6443 --certificate-authority=ca.crt
+    kubectl --kubeconfig user.kubeconfig config set-credentials user --client-certificate path/for/user.crt --client-key path/for/user.key
+    kubectl --kubeconfig user.kubeconfig config set-context user-kubernetes --cluster kubernetes --namespace name-space --user user-name
+    
+    vim user-kubernetes
+    change current-context: user-kubernetes
+    
+    copy user.kubecofig to user-home/.kube/config
+
+ 2. Create from cluster admin
+    copy config file and edit with below details,
+
+    user:
+    current-context:
+    user
+    - name: 
+      user:
+        client-certificate-data:
+        client-key-data:
+Note:
+cat user-name.crt | base64 -w0
+cat user-name.key | base64 -w0
+
+2. Create Roles
+============================================================================
+kubectl create role role-name --verb=get,list --resource=pods --namespace name-space
+
+3. Create Roll Binding for user
+==============================================================================
+kubectl create rollbinding rollbinding-name --role=role-name --user=user-name --namespace name-space
+
+OR
+
+3. Create Roll Binding for group
+==============================================================================
+kubectl create rollbinding rollbinding-name --role=role-name --group=group-name --namespace name-space
+
