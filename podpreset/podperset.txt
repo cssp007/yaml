@@ -1,0 +1,51 @@
+PodPreset is configure env or storage while creating Pod with match labels.
+
+First check it's enable or NOT. if NOT, enable using below mentioned steps.
+
+Edit in /etc/kubernetes/minifast/kube-apiserver.yaml
+
+Step 1: 
+You have enabled the admission controller PodPreset. 
+Way to doing this is to include "PodPreset" in the --enable-admission-plugins 
+option value specified for the API server.
+
+Step 2: 
+You have enabled the API type settings.k8s.io/v1alpha1/podpreset. 
+For example, this can be done by including settings.k8s.io/v1alpha1=true 
+in the --runtime-config option for the API server.
+
+- --runtime-config=settings.k8s.io/v1alpha1=true
+
+Create Podpreset:
+================
+apiVersion: settings.k8s.io/v1alpha1
+kind: PodPreset
+metadata:
+  name: app1-env
+spec:
+  selector:
+    matchLabels:
+      role: app1
+  env:
+    - name: ENV-NAME
+      value: "ENV-VALUE"
+
+Use PodPreset:
+==============
+apiVersion: settings.k8s.io/v1alpha1
+kind: PodPreset
+metadata:
+  name: app1-mounts
+spec:
+  selector:
+    matchLabels:
+      role: app1
+  volumeMounts:
+    - mountPath: /mydata
+      name: web-volume
+  volumes:
+    - name: web-volume
+      emptyDir: {}
+
+
+
